@@ -40,8 +40,9 @@ html, body {
 .tab.on { color: var(--accent); }
 .page {
   position: fixed; top: 52px; bottom: 60px;
-  left: 0; right: 0; overflow-y: auto;
+  left: 0; right: 0; overflow-y: scroll;
   -webkit-overflow-scrolling: touch; display: none;
+  color: #f0ece4;
 }
 .page.on { display: block; }
 
@@ -191,14 +192,14 @@ html, body {
 </div>
 
 <!-- PAGE: EDITOR -->
-<div class="page" id="pg-editor" style="background:#1e1e1e; padding:16px; overflow-y:auto;">
+<div class="page" id="pg-editor" style="background:#111; padding:60px 16px 16px; box-sizing:border-box;">
   <div id="ed-empty" style="text-align:center; padding:60px 20px; color:#888; font-size:14px;">
     Selecciona un car&aacute;cter en Caracteres
   </div>
   <div id="ed-main" style="display:none;">
     <div id="ed-char" style="font-size:60px; color:#e8c547; text-align:center; padding:10px 0;">A</div>
     <div id="ed-info" style="text-align:center; font-size:12px; color:#888; margin-bottom:16px;">A &mdash; U+0041</div>
-    <div id="ed-no-img" style="background:#111; border:2px dashed #333; border-radius:10px; padding:30px; text-align:center; margin-bottom:12px; cursor:pointer;" onclick="document.getElementById('file-in').click()">
+    <div id="ed-no-img" style="background:#1e1e1e; border:2px dashed #333; border-radius:10px; padding:30px; text-align:center; margin-bottom:12px; cursor:pointer;" onclick="document.getElementById('file-in').click()">
       <div style="font-size:32px; margin-bottom:8px;">&#128194;</div>
       <div style="color:#888; font-size:14px;">Toca para cargar imagen</div>
       <div style="color:#666; font-size:11px; margin-top:4px;">PNG con fondo transparente</div>
@@ -207,21 +208,21 @@ html, body {
       <img id="dz-img" alt="" style="max-width:100%; max-height:180px; border-radius:8px; display:block; margin:0 auto 10px;">
     </div>
     <input type="file" id="file-in" accept="image/*" style="display:none">
-    <div id="sliders-wrap" style="display:none; background:#111; border-radius:10px; padding:14px; margin-bottom:12px;">
+    <div id="sliders-wrap" style="display:none; background:#1e1e1e; border-radius:10px; padding:14px; margin-bottom:12px;">
       <div style="display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #333;">
         <span style="font-size:12px; color:#888; width:70px;">Baseline</span>
         <input type="range" id="sl-base" min="-200" max="200" value="0" style="flex:1; height:4px; -webkit-appearance:none; background:#333; border-radius:2px; outline:none;">
-        <span id="vl-base" style="width:40px; text-align:right; font-size:12px;">0</span>
+        <span id="vl-base" style="width:40px; text-align:right; font-size:12px; color:#f0ece4;">0</span>
       </div>
       <div style="display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #333;">
         <span style="font-size:12px; color:#888; width:70px;">Escala</span>
         <input type="range" id="sl-scale" min="30" max="200" value="100" style="flex:1; height:4px; -webkit-appearance:none; background:#333; border-radius:2px; outline:none;">
-        <span id="vl-scale" style="width:40px; text-align:right; font-size:12px;">100%</span>
+        <span id="vl-scale" style="width:40px; text-align:right; font-size:12px; color:#f0ece4;">100%</span>
       </div>
       <div style="display:flex; align-items:center; gap:8px; padding:8px 0;">
         <span style="font-size:12px; color:#888; width:70px;">Avance</span>
         <input type="range" id="sl-adv" min="50" max="600" value="200" style="flex:1; height:4px; -webkit-appearance:none; background:#333; border-radius:2px; outline:none;">
-        <span id="vl-adv" style="width:40px; text-align:right; font-size:12px;">200</span>
+        <span id="vl-adv" style="width:40px; text-align:right; font-size:12px; color:#f0ece4;">200</span>
       </div>
     </div>
     <button id="btn-load" style="display:block; width:100%; padding:15px; background:#e8c547; color:#111; border:none; border-radius:10px; font-size:14px; font-weight:bold; margin-bottom:10px; cursor:pointer;">&#128194; Cargar imagen PNG</button>
