@@ -6,233 +6,186 @@
 <title>Industar Font</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg: #111; --surface: #1e1e1e; --border: #333;
-  --accent: #e8c547; --text: #f0ece4; --muted: #888;
-  --green: #4caf50; --red: #e53935;
-  --tabh: 60px; --hdrh: 52px;
-}
-html, body {
-  height: 100%; background: var(--bg); color: var(--text);
-  font-family: Arial, sans-serif; font-size: 15px; overflow: hidden;
-}
+body { background: #111; color: #f0ece4; font-family: Arial, sans-serif; font-size: 15px; }
+
+/* HEADER fijo */
 #header {
   position: fixed; top: 0; left: 0; right: 0; height: 52px;
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; padding: 0 16px; z-index: 50;
+  background: #1e1e1e; border-bottom: 1px solid #333;
+  display: flex; align-items: center; padding: 0 16px; z-index: 100;
 }
-#header h1 { font-size: 18px; font-weight: bold; color: var(--accent); letter-spacing: 2px; }
-#header .cnt { margin-left: auto; font-size: 12px; color: var(--muted); }
-#header .cnt b { color: var(--accent); }
+#header h1 { font-size: 18px; font-weight: bold; color: #e8c547; letter-spacing: 2px; }
+#hdr-cnt { margin-left: auto; font-size: 12px; color: #888; }
+#hdr-cnt b { color: #e8c547; }
+
+/* TABBAR fijo */
 #tabbar {
   position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
-  background: var(--surface); border-top: 1px solid var(--border);
-  display: flex; z-index: 50;
+  background: #1e1e1e; border-top: 1px solid #333;
+  display: flex; z-index: 100;
 }
 .tab {
   flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 4px;
-  font-size: 10px; color: var(--muted); cursor: pointer;
-  border: none; background: none; padding: 0;
-  text-transform: uppercase; letter-spacing: 1px; font-family: Arial, sans-serif;
+  align-items: center; justify-content: center; gap: 3px;
+  font-size: 10px; color: #888; border: none; background: none;
+  text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+  font-family: Arial, sans-serif;
 }
-.tab .ico { font-size: 20px; }
-.tab.on { color: var(--accent); }
-.page {
-  position: fixed; top: 52px; bottom: 60px;
-  left: 0; right: 0; overflow-y: scroll;
-  -webkit-overflow-scrolling: touch; display: none;
-  color: #f0ece4;
-}
-.page.on { display: block; }
+.tab .ico { font-size: 18px; }
+.tab.on { color: #e8c547; }
 
-/* CHARS PAGE */
-#pg-chars { padding: 12px; }
-.sec-title {
-  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-  color: var(--muted); padding: 12px 0 8px;
+/* CONTENIDO: margen para header y tabbar */
+#content {
+  margin-top: 52px;
+  margin-bottom: 60px;
+  min-height: calc(100vh - 112px);
 }
-.grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 6px; margin-bottom: 8px; }
+
+/* PÁGINAS: simplemente ocultas/visibles */
+.pg { display: none; padding: 12px; }
+.pg.on { display: block; }
+
+/* GRID de caracteres */
+.sec { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #888; padding: 10px 0 6px; }
+.grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 6px; margin-bottom: 10px; }
 .gcell {
-  position: relative;
-  background: var(--surface);
-  border: 2px solid var(--border); border-radius: 8px;
-  cursor: pointer; overflow: hidden;
-  -webkit-tap-highlight-color: transparent;
-}
-/* Padding-bottom trick: makes height equal to width in all browsers */
-.gcell-inner {
-  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
+  background: #1e1e1e; border: 2px solid #333; border-radius: 8px;
+  cursor: pointer; position: relative; overflow: hidden;
 }
 .gcell::before { content: ''; display: block; padding-bottom: 100%; }
+.gcell-in {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
 .gcell .ltr { font-size: 18px; line-height: 1; }
-.gcell .cod { font-size: 7px; color: var(--muted); margin-top: 1px; }
-.gcell.has { border-color: var(--green); }
-.gcell.sel { border-color: var(--accent); background: rgba(232,197,71,0.1); }
-.gcell .dot {
-  position: absolute; bottom: 3px; right: 3px;
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--green); display: none;
-}
+.gcell .cod { font-size: 7px; color: #888; margin-top: 1px; }
+.gcell.has { border-color: #4caf50; }
+.gcell.sel { border-color: #e8c547; background: rgba(232,197,71,0.1); }
+.gcell .dot { position: absolute; bottom: 3px; right: 3px; width: 7px; height: 7px; border-radius: 50%; background: #4caf50; display: none; }
 .gcell.has .dot { display: block; }
-.gcell .thumb {
-  position: absolute; top: 0; left: 0;
-  width: 100%; height: 100%; object-fit: contain; padding: 4px;
-}
+.gcell .thumb { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; padding: 4px; }
 
-/* EDITOR PAGE */
-#pg-editor { padding: 16px; }
-#ed-empty { text-align: center; padding: 80px 20px; color: var(--muted); line-height: 1.8; }
+/* EDITOR */
+#ed-empty { text-align: center; padding: 60px 20px; color: #888; line-height: 1.8; }
 #ed-main { display: none; }
-#ed-char { font-size: 64px; color: var(--accent); text-align: center; line-height: 1; margin-bottom: 4px; }
-#ed-info { text-align: center; font-size: 12px; color: var(--muted); margin-bottom: 16px; }
-#dropzone {
-  border: 2px dashed var(--border); border-radius: 12px;
-  min-height: 160px; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 10px; cursor: pointer; margin-bottom: 16px; overflow: hidden;
+#ed-char { font-size: 56px; color: #e8c547; text-align: center; padding: 8px 0; }
+#ed-info { text-align: center; font-size: 12px; color: #888; margin-bottom: 14px; }
+#ed-no-img {
+  background: #1e1e1e; border: 2px dashed #333; border-radius: 10px;
+  padding: 28px; text-align: center; margin-bottom: 12px; cursor: pointer;
 }
-#dropzone.has { border-color: var(--green); border-style: solid; padding: 8px; min-height: auto; }
-#dz-ico { font-size: 36px; opacity: 0.4; }
-#dz-txt { font-size: 14px; color: var(--muted); }
-#dz-hint { font-size: 11px; color: var(--muted); opacity: 0.6; }
-#dz-img { max-width: 100%; max-height: 200px; object-fit: contain; display: none; border-radius: 6px; }
+#ed-no-img .ico { font-size: 30px; margin-bottom: 8px; }
+#ed-no-img .txt { color: #888; font-size: 14px; }
+#ed-no-img .hint { color: #666; font-size: 11px; margin-top: 4px; }
+#ed-has-img { display: none; text-align: center; margin-bottom: 12px; }
+#dz-img { max-width: 100%; max-height: 180px; border-radius: 8px; }
 #file-in { display: none; }
-#sliders-wrap { display: none; }
-.card { background: var(--surface); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
-.card-title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
-.srow { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+#sliders-wrap { display: none; background: #1e1e1e; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+.srow { display: flex; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid #333; }
 .srow:last-child { border: none; padding-bottom: 0; }
-.slbl { font-size: 12px; color: var(--muted); width: 72px; }
-.srow input[type=range] {
-  flex: 1; height: 4px; -webkit-appearance: none;
-  background: var(--border); border-radius: 2px; outline: none;
-}
-.srow input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 26px; height: 26px;
-  border-radius: 50%; background: var(--accent);
-}
-.sval { width: 42px; text-align: right; font-size: 12px; }
-.btn {
-  display: block; width: 100%; padding: 15px; border-radius: 10px;
-  border: none; font-size: 14px; font-weight: bold; letter-spacing: 1px;
-  text-transform: uppercase; cursor: pointer; margin-bottom: 10px;
-  font-family: Arial, sans-serif; -webkit-tap-highlight-color: transparent;
-}
-.btn-p { background: var(--accent); color: #111; }
-.btn-d { background: transparent; border: 2px solid var(--red); color: var(--red); }
+.slbl { font-size: 12px; color: #888; width: 70px; flex-shrink: 0; }
+.srow input[type=range] { flex: 1; height: 4px; -webkit-appearance: none; background: #333; border-radius: 2px; outline: none; }
+.srow input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #e8c547; }
+.sval { width: 42px; text-align: right; font-size: 12px; color: #f0ece4; flex-shrink: 0; }
+.btn { display: block; width: 100%; padding: 15px; border-radius: 10px; border: none; font-size: 14px; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-family: Arial, sans-serif; }
+.btn-p { background: #e8c547; color: #111; }
+.btn-d { background: transparent; border: 2px solid #e53935; color: #e53935; }
 .btn:disabled { opacity: 0.3; }
 
-/* PREVIEW PAGE */
-#pg-preview { padding: 16px; }
-.card textarea {
-  width: 100%; background: var(--bg); border: 1px solid var(--border);
-  border-radius: 8px; color: var(--text); font-size: 14px;
-  padding: 10px 12px; resize: none; outline: none; font-family: Arial, sans-serif;
-}
-#pv-wrap { background: white; border-radius: 8px; margin-top: 10px; min-height: 80px; overflow: hidden; }
+/* PREVIEW */
+#pv-canvas-wrap { background: white; border-radius: 8px; margin-top: 10px; overflow: hidden; }
 #pv-canvas { display: block; width: 100%; }
+.card { background: #1e1e1e; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+.card-title { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #888; margin-bottom: 10px; }
+.card textarea { width: 100%; background: #111; border: 1px solid #333; border-radius: 8px; color: #f0ece4; font-size: 14px; padding: 10px; resize: none; outline: none; font-family: Arial, sans-serif; }
 .row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
-.row label { font-size: 12px; color: var(--muted); white-space: nowrap; }
-.row input[type=range] {
-  flex: 1; height: 4px; -webkit-appearance: none;
-  background: var(--border); border-radius: 2px; outline: none;
-}
-.row input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 26px; height: 26px;
-  border-radius: 50%; background: var(--accent);
-}
-.rval { font-size: 12px; width: 36px; }
+.row label { font-size: 12px; color: #888; white-space: nowrap; }
+.row input[type=range] { flex: 1; height: 4px; -webkit-appearance: none; background: #333; border-radius: 2px; outline: none; }
+.row input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: #e8c547; }
+.rval { font-size: 12px; color: #f0ece4; width: 36px; }
 
-/* EXPORT PAGE */
-#pg-export { padding: 16px; }
-.summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-.sbox { background: var(--surface); border-radius: 10px; padding: 16px; text-align: center; }
-.sbox .n { font-size: 40px; font-weight: bold; color: var(--accent); line-height: 1; }
-.sbox .l { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
-.field { margin-bottom: 12px; }
-.field label { display: block; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-.field input {
-  width: 100%; background: var(--bg); border: 1px solid var(--border);
-  border-radius: 8px; color: var(--text); font-size: 15px;
-  padding: 11px 13px; outline: none; font-family: Arial, sans-serif;
-}
+/* EXPORTAR */
+.summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.sbox { background: #1e1e1e; border-radius: 10px; padding: 14px; text-align: center; }
+.sbox .n { font-size: 38px; font-weight: bold; color: #e8c547; line-height: 1; }
+.sbox .l { font-size: 11px; color: #888; margin-top: 4px; text-transform: uppercase; }
+.field { margin-bottom: 10px; }
+.field label { display: block; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+.field input { width: 100%; background: #111; border: 1px solid #333; border-radius: 8px; color: #f0ece4; font-size: 15px; padding: 10px 12px; outline: none; font-family: Arial, sans-serif; }
 .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.info { background: var(--surface); border-radius: 10px; padding: 14px; font-size: 12px; color: var(--muted); line-height: 1.8; margin-bottom: 12px; }
-.info b { color: var(--text); }
+.info { background: #1e1e1e; border-radius: 10px; padding: 12px; font-size: 12px; color: #888; line-height: 1.8; margin-bottom: 12px; }
+.info b { color: #f0ece4; }
 #prog-wrap { margin: 10px 0; display: none; }
-.pbar { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; }
-.pfill { height: 100%; background: var(--accent); width: 0; }
-#status { font-size: 12px; color: var(--muted); margin-top: 8px; text-align: center; min-height: 18px; }
-#status.ok { color: var(--green); }
-#status.err { color: var(--red); }
+.pbar { height: 5px; background: #333; border-radius: 3px; overflow: hidden; }
+.pfill { height: 100%; background: #e8c547; width: 0; }
+#status { font-size: 12px; color: #888; margin-top: 8px; text-align: center; min-height: 18px; }
+#status.ok { color: #4caf50; }
+#status.err { color: #e53935; }
 </style>
 </head>
 <body>
 
 <div id="header">
   <h1>INDUSTAR FONT</h1>
-  <div class="cnt"><b id="n-loaded">0</b> / <span id="n-total">0</span></div>
+  <div id="hdr-cnt"><b id="n-loaded">0</b> / <span id="n-total">0</span></div>
 </div>
 
-<!-- PAGE: CARACTERES -->
-<div class="page on" id="pg-chars">
-  <div style="padding:12px">
-    <div class="sec-title">May&uacute;sculas</div>
+<div id="content">
+
+  <!-- CARACTERES -->
+  <div class="pg on" id="pg-chars">
+    <div class="sec">May&uacute;sculas</div>
     <div class="grid" id="grid-upper"></div>
-    <div class="sec-title">Min&uacute;sculas</div>
+    <div class="sec">Min&uacute;sculas</div>
     <div class="grid" id="grid-lower"></div>
-    <div class="sec-title">N&uacute;meros</div>
+    <div class="sec">N&uacute;meros</div>
     <div class="grid" id="grid-nums"></div>
-    <div class="sec-title">S&iacute;mbolos</div>
+    <div class="sec">S&iacute;mbolos</div>
     <div class="grid" id="grid-sym"></div>
   </div>
-</div>
 
-<!-- PAGE: EDITOR -->
-<div class="page" id="pg-editor" style="background:#111; padding:60px 16px 16px; box-sizing:border-box;">
-  <div id="ed-empty" style="text-align:center; padding:60px 20px; color:#888; font-size:14px;">
-    Selecciona un car&aacute;cter en Caracteres
+  <!-- EDITOR -->
+  <div class="pg" id="pg-editor">
+    <div id="ed-empty">
+      <div style="font-size:48px;opacity:0.3;margin-bottom:12px">&#9998;</div>
+      Selecciona un car&aacute;cter<br>en la pesta&ntilde;a <b>Caracteres</b>
+    </div>
+    <div id="ed-main">
+      <div id="ed-char">A</div>
+      <div id="ed-info">A &mdash; U+0041</div>
+      <div id="ed-no-img" onclick="document.getElementById('file-in').click()">
+        <div class="ico">&#128194;</div>
+        <div class="txt">Toca para cargar imagen</div>
+        <div class="hint">PNG con fondo transparente</div>
+      </div>
+      <div id="ed-has-img">
+        <img id="dz-img" alt="">
+      </div>
+      <input type="file" id="file-in" accept="image/*">
+      <div id="sliders-wrap">
+        <div class="srow">
+          <span class="slbl">Baseline</span>
+          <input type="range" id="sl-base" min="-200" max="200" value="0">
+          <span class="sval" id="vl-base">0</span>
+        </div>
+        <div class="srow">
+          <span class="slbl">Escala</span>
+          <input type="range" id="sl-scale" min="30" max="200" value="100">
+          <span class="sval" id="vl-scale">100%</span>
+        </div>
+        <div class="srow">
+          <span class="slbl">Avance</span>
+          <input type="range" id="sl-adv" min="50" max="600" value="200">
+          <span class="sval" id="vl-adv">200</span>
+        </div>
+      </div>
+      <button class="btn btn-p" id="btn-load">&#128194; Cargar imagen PNG</button>
+      <button class="btn btn-d" id="btn-del" disabled>Quitar imagen</button>
+    </div>
   </div>
-  <div id="ed-main" style="display:none;">
-    <div id="ed-char" style="font-size:60px; color:#e8c547; text-align:center; padding:10px 0;">A</div>
-    <div id="ed-info" style="text-align:center; font-size:12px; color:#888; margin-bottom:16px;">A &mdash; U+0041</div>
-    <div id="ed-no-img" style="background:#1e1e1e; border:2px dashed #333; border-radius:10px; padding:30px; text-align:center; margin-bottom:12px; cursor:pointer;" onclick="document.getElementById('file-in').click()">
-      <div style="font-size:32px; margin-bottom:8px;">&#128194;</div>
-      <div style="color:#888; font-size:14px;">Toca para cargar imagen</div>
-      <div style="color:#666; font-size:11px; margin-top:4px;">PNG con fondo transparente</div>
-    </div>
-    <div id="ed-has-img" style="display:none; margin-bottom:12px; text-align:center;">
-      <img id="dz-img" alt="" style="max-width:100%; max-height:180px; border-radius:8px; display:block; margin:0 auto 10px;">
-    </div>
-    <input type="file" id="file-in" accept="image/*" style="display:none">
-    <div id="sliders-wrap" style="display:none; background:#1e1e1e; border-radius:10px; padding:14px; margin-bottom:12px;">
-      <div style="display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #333;">
-        <span style="font-size:12px; color:#888; width:70px;">Baseline</span>
-        <input type="range" id="sl-base" min="-200" max="200" value="0" style="flex:1; height:4px; -webkit-appearance:none; background:#333; border-radius:2px; outline:none;">
-        <span id="vl-base" style="width:40px; text-align:right; font-size:12px; color:#f0ece4;">0</span>
-      </div>
-      <div style="display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid #333;">
-        <span style="font-size:12px; color:#888; width:70px;">Escala</span>
-        <input type="range" id="sl-scale" min="30" max="200" value="100" style="flex:1; height:4px; -webkit-appearance:none; background:#333; border-radius:2px; outline:none;">
-        <span id="vl-scale" style="width:40px; text-align:right; font-size:12px; color:#f0ece4;">100%</span>
-      </div>
-      <div style="display:flex; align-items:center; gap:8px; padding:8px 0;">
-        <span style="font-size:12px; color:#888; width:70px;">Avance</span>
-        <input type="range" id="sl-adv" min="50" max="600" value="200" style="flex:1; height:4px; -webkit-appearance:none; background:#333; border-radius:2px; outline:none;">
-        <span id="vl-adv" style="width:40px; text-align:right; font-size:12px; color:#f0ece4;">200</span>
-      </div>
-    </div>
-    <button id="btn-load" style="display:block; width:100%; padding:15px; background:#e8c547; color:#111; border:none; border-radius:10px; font-size:14px; font-weight:bold; margin-bottom:10px; cursor:pointer;">&#128194; Cargar imagen PNG</button>
-    <button id="btn-del" style="display:block; width:100%; padding:15px; background:transparent; color:#e53935; border:2px solid #e53935; border-radius:10px; font-size:14px; font-weight:bold; cursor:pointer;" disabled>Quitar imagen</button>
-  </div>
-</div>
 
-<!-- PAGE: PREVIEW -->
-<div class="page" id="pg-preview">
-  <div style="padding:16px">
+  <!-- PREVIEW -->
+  <div class="pg" id="pg-preview">
     <div class="card">
       <div class="card-title">Texto de prueba</div>
       <textarea id="pv-text" rows="3">GALLETAS MARCO</textarea>
@@ -247,14 +200,12 @@ html, body {
         <span class="rval" id="pv-sp-v">10</span>
       </div>
     </div>
-    <div id="pv-wrap"><canvas id="pv-canvas"></canvas></div>
-    <p style="font-size:11px;color:var(--muted);margin-top:10px;text-align:center">Solo aparecen los caracteres ya cargados</p>
+    <div id="pv-canvas-wrap"><canvas id="pv-canvas"></canvas></div>
+    <p style="font-size:11px;color:#888;margin-top:8px;text-align:center">Solo aparecen los caracteres ya cargados</p>
   </div>
-</div>
 
-<!-- PAGE: EXPORTAR -->
-<div class="page" id="pg-export">
-  <div style="padding:16px">
+  <!-- EXPORTAR -->
+  <div class="pg" id="pg-export">
     <div class="summary">
       <div class="sbox"><div class="n" id="exp-n">0</div><div class="l">Cargados</div></div>
       <div class="sbox"><div class="n" id="exp-t">0</div><div class="l">Posibles</div></div>
@@ -266,13 +217,12 @@ html, body {
     <div class="card">
       <div class="card-title">Carga en lote</div>
       <div class="info">
-        <b>Nombres de archivo reconocidos:</b><br>
+        <b>Nombres reconocidos:</b><br>
         A.png &rarr; A may&uacute;scula<br>
         a.png &rarr; a min&uacute;scula<br>
-        0041.png &rarr; c&oacute;digo Unicode hex<br>
-        n_etc.png &rarr; primera letra del nombre
+        0041.png &rarr; c&oacute;digo Unicode
       </div>
-      <button class="btn btn-p" id="btn-batch">&#128230; Seleccionar varios archivos</button>
+      <button class="btn btn-p" id="btn-batch">&#128230; Varios archivos a la vez</button>
       <input type="file" id="batch-in" accept="image/*" multiple style="display:none">
     </div>
     <div class="card">
@@ -286,9 +236,9 @@ html, body {
     <div id="prog-wrap"><div class="pbar"><div class="pfill" id="pfill"></div></div></div>
     <div id="status"></div>
   </div>
-</div>
 
-<!-- TABBAR -->
+</div><!-- /content -->
+
 <div id="tabbar">
   <button class="tab on" id="tab-chars"><span class="ico">&#128290;</span>Caracteres</button>
   <button class="tab" id="tab-editor"><span class="ico">&#9998;</span>Editor</button>
@@ -297,61 +247,47 @@ html, body {
 </div>
 
 <script>
-// ── Datos ──────────────────────────────────────────────────────────────
-// Todos los caracteres definidos como códigos numéricos para evitar
-// cualquier problema de codificación de texto en el archivo
+var glyphs = {};
+var activeCode = -1;
+
 var UPPER = [65,66,67,68,69,70,71,72,73,74,75,76,77,78,209,79,80,81,82,83,84,85,86,87,88,89,90];
-// A-Z + Ñ(209)
 var LOWER = [97,98,99,100,101,102,103,104,105,106,107,108,109,110,241,111,112,113,114,115,116,117,118,119,120,121,122];
-// a-z + ñ(241)
 var NUMS  = [48,49,50,51,52,53,54,55,56,57];
-// 0-9
 var SYM   = [46,44,59,58,33,161,63,191,45,95,40,41,47,64,35,37,38,43,61,34,39,32,168,196,203,207,214,220,228,235,239,246,252];
-// . , ; : ! ¡ ? ¿ - _ ( ) / @ # % & + = " ' SPACE ¨ Ä Ë Ï Ö Ü ä ë ï ö ü
+var ALL   = UPPER.concat(LOWER).concat(NUMS).concat(SYM);
 
-var ALL_CODES = UPPER.concat(LOWER).concat(NUMS).concat(SYM);
-
-var glyphs = {};      // code(number) -> {img, src, baseline, scale, advance}
-var activeCode = -1;  // current char code
-
-// ── Construir rejilla ──────────────────────────────────────────────────
 function buildGrids() {
-  fillGrid('grid-upper', UPPER);
-  fillGrid('grid-lower', LOWER);
-  fillGrid('grid-nums',  NUMS);
-  fillGrid('grid-sym',   SYM);
-  document.getElementById('n-total').textContent = ALL_CODES.length;
-  document.getElementById('exp-t').textContent   = ALL_CODES.length;
+  fill('grid-upper', UPPER);
+  fill('grid-lower', LOWER);
+  fill('grid-nums',  NUMS);
+  fill('grid-sym',   SYM);
+  document.getElementById('n-total').textContent = ALL.length;
+  document.getElementById('exp-t').textContent   = ALL.length;
 }
 
-function fillGrid(gridId, codes) {
-  var grid = document.getElementById(gridId);
-  if (!grid) return;
-  for (var i = 0; i < codes.length; i++) {
-    grid.appendChild(makeCell(codes[i]));
-  }
+function fill(id, codes) {
+  var g = document.getElementById(id);
+  for (var i = 0; i < codes.length; i++) g.appendChild(makeCell(codes[i]));
 }
 
 function makeCell(code) {
-  var ch = String.fromCharCode(code);
   var cell = document.createElement('div');
   cell.className = 'gcell';
   cell.id = 'cell-' + code;
 
-  // Inner wrapper (needed for padding-bottom square trick)
   var inner = document.createElement('div');
-  inner.className = 'gcell-inner';
+  inner.className = 'gcell-in';
 
   var ltr = document.createElement('div');
   ltr.className = 'ltr';
-  ltr.textContent = (code === 32) ? String.fromCharCode(9242) : ch;
+  ltr.textContent = code === 32 ? '_' : String.fromCharCode(code);
   inner.appendChild(ltr);
 
   var cod = document.createElement('div');
   cod.className = 'cod';
-  var hex = code.toString(16).toUpperCase();
-  while (hex.length < 4) hex = '0' + hex;
-  cod.textContent = 'U+' + hex;
+  var h = code.toString(16).toUpperCase();
+  while (h.length < 4) h = '0' + h;
+  cod.textContent = 'U+' + h;
   inner.appendChild(cod);
 
   var dot = document.createElement('div');
@@ -360,114 +296,71 @@ function makeCell(code) {
 
   cell.appendChild(inner);
 
-  (function(c) {
-    cell.addEventListener('click', function() { selectCode(c); });
-  })(code);
-
+  (function(c) { cell.addEventListener('click', function() { selectCode(c); }); })(code);
   return cell;
 }
 
-// ── Seleccionar carácter ───────────────────────────────────────────────
 function selectCode(code) {
   activeCode = code;
-
   var cells = document.querySelectorAll('.gcell');
   for (var i = 0; i < cells.length; i++) cells[i].classList.remove('sel');
   var cell = document.getElementById('cell-' + code);
   if (cell) cell.classList.add('sel');
-
   showPage('editor');
-
-  // Debug panel visible
-  var pg = document.getElementById('pg-editor');
-  var debug = document.getElementById('debug-panel');
-  if (!debug) {
-    debug = document.createElement('div');
-    debug.id = 'debug-panel';
-    debug.style.cssText = 'position:absolute;top:0;left:0;right:0;background:#e53935;color:white;padding:12px;font-size:13px;z-index:999;';
-    pg.appendChild(debug);
-  }
-  debug.textContent = 'Paso 1: selectCode(' + code + ') OK';
-
-  try {
-    var empty = document.getElementById('ed-empty');
-    debug.textContent += ' | ed-empty:' + (empty ? 'OK' : 'NULL');
-    var main = document.getElementById('ed-main');
-    debug.textContent += ' | ed-main:' + (main ? 'OK' : 'NULL');
-    if (empty) empty.style.display = 'none';
-    if (main)  { main.style.display = ''; main.style.visibility = 'visible'; main.style.opacity = '1'; }
-    debug.textContent += ' | display aplicado';
-    refreshEditor();
-    debug.textContent += ' | refreshEditor OK';
-  } catch(e) {
-    debug.textContent += ' | ERROR: ' + e.message;
-  }
+  refreshEditor();
 }
 
-// ── Editor ────────────────────────────────────────────────────────────
 function refreshEditor() {
   var empty = document.getElementById('ed-empty');
   var main  = document.getElementById('ed-main');
   if (!empty || !main) return;
 
-  if (activeCode < 0) {
-    empty.style.display = '';
-    main.style.display = 'none';
-    return;
-  }
+  if (activeCode < 0) { empty.style.display = ''; main.style.display = 'none'; return; }
 
   empty.style.display = 'none';
-  main.style.display = '';
+  main.style.display = 'block';
 
   var ch = String.fromCharCode(activeCode);
-  var hex = activeCode.toString(16).toUpperCase();
-  while (hex.length < 4) hex = '0' + hex;
-
-  document.getElementById('ed-char').textContent = (activeCode === 32) ? '␣' : ch;
-  document.getElementById('ed-info').textContent = ch + ' — U+' + hex;
+  var h = activeCode.toString(16).toUpperCase();
+  while (h.length < 4) h = '0' + h;
+  document.getElementById('ed-char').textContent = ch;
+  document.getElementById('ed-info').textContent = ch + ' - U+' + h;
 
   var g = glyphs[activeCode];
   var noImg  = document.getElementById('ed-no-img');
   var hasImg = document.getElementById('ed-has-img');
-  var dzImg  = document.getElementById('dz-img');
   var sw     = document.getElementById('sliders-wrap');
   var bd     = document.getElementById('btn-del');
 
   if (g) {
-    if (noImg)  noImg.style.display  = 'none';
-    if (hasImg) hasImg.style.display = '';
-    if (dzImg)  dzImg.src = g.src;
-    if (sw)     sw.style.display = '';
-    if (bd)     bd.disabled = false;
-    var sb = document.getElementById('sl-base');
-    var ss = document.getElementById('sl-scale');
-    var sa = document.getElementById('sl-adv');
-    if (sb) { sb.value = g.baseline; document.getElementById('vl-base').textContent = g.baseline; }
-    if (ss) { ss.value = g.scale;    document.getElementById('vl-scale').textContent = g.scale + '%'; }
-    if (sa) { sa.value = g.advance;  document.getElementById('vl-adv').textContent = g.advance; }
+    noImg.style.display  = 'none';
+    hasImg.style.display = 'block';
+    document.getElementById('dz-img').src = g.src;
+    sw.style.display = 'block';
+    bd.disabled = false;
+    document.getElementById('sl-base').value  = g.baseline;  document.getElementById('vl-base').textContent  = g.baseline;
+    document.getElementById('sl-scale').value = g.scale;     document.getElementById('vl-scale').textContent = g.scale + '%';
+    document.getElementById('sl-adv').value   = g.advance;   document.getElementById('vl-adv').textContent   = g.advance;
   } else {
-    if (noImg)  noImg.style.display  = '';
-    if (hasImg) hasImg.style.display = 'none';
-    if (dzImg)  dzImg.src = '';
-    if (sw)     sw.style.display = 'none';
-    if (bd)     bd.disabled = true;
+    noImg.style.display  = 'block';
+    hasImg.style.display = 'none';
+    document.getElementById('dz-img').src = '';
+    sw.style.display = 'none';
+    bd.disabled = true;
   }
 }
 
-// ── Carga de archivo ───────────────────────────────────────────────────
 function loadFile(file, code, cb) {
   var reader = new FileReader();
   reader.onload = function(e) {
     var img = new Image();
     img.onload = function() {
       var prev = glyphs[code];
-      var adv  = Math.min(500, Math.round(img.naturalWidth * 1.1));
       glyphs[code] = {
-        img:      img,
-        src:      e.target.result,
+        img: img, src: e.target.result,
         baseline: prev ? prev.baseline : 0,
         scale:    prev ? prev.scale    : 100,
-        advance:  prev ? prev.advance  : adv
+        advance:  prev ? prev.advance  : Math.min(500, Math.round(img.naturalWidth * 1.1))
       };
       markLoaded(code);
       updateCounts();
@@ -483,12 +376,7 @@ function markLoaded(code) {
   if (!cell) return;
   cell.classList.add('has');
   var thumb = cell.querySelector('.thumb');
-  if (!thumb) {
-    thumb = document.createElement('img');
-    thumb.className = 'thumb';
-    thumb.alt = '';
-    cell.appendChild(thumb);
-  }
+  if (!thumb) { thumb = document.createElement('img'); thumb.className = 'thumb'; thumb.alt = ''; cell.appendChild(thumb); }
   thumb.src = glyphs[code].src;
 }
 
@@ -496,326 +384,156 @@ function deleteGlyph() {
   if (activeCode < 0 || !glyphs[activeCode]) return;
   delete glyphs[activeCode];
   var cell = document.getElementById('cell-' + activeCode);
-  if (cell) {
-    cell.classList.remove('has');
-    var t = cell.querySelector('.thumb');
-    if (t) t.parentNode.removeChild(t);
-  }
-  updateCounts();
-  refreshEditor();
-  renderPreview();
+  if (cell) { cell.classList.remove('has'); var t = cell.querySelector('.thumb'); if (t) t.parentNode.removeChild(t); }
+  updateCounts(); refreshEditor(); renderPreview();
 }
 
 function setProp(prop, val) {
   if (activeCode < 0 || !glyphs[activeCode]) return;
-  glyphs[activeCode][prop] = val;
-  renderPreview();
+  glyphs[activeCode][prop] = val; renderPreview();
 }
 
-// ── Carga en lote ──────────────────────────────────────────────────────
 function batchLoad(files) {
-  var matched = 0, done = 0, total = files.length;
+  var total = files.length, matched = 0, done = 0;
   if (!total) { setStatus('No se seleccionaron archivos.', 'err'); return; }
-
   for (var i = 0; i < total; i++) {
     var name = files[i].name.replace(/\.[^.]+$/, '');
     var code = guessCode(name);
     if (code !== -1) {
       matched++;
-      (function(f, c) {
-        loadFile(f, c, function() {
-          done++;
-          if (done === total) setStatus(matched + ' de ' + total + ' archivos reconocidos.', matched > 0 ? 'ok' : 'err');
-        });
-      })(files[i], code);
-    } else {
-      done++;
-      if (done === total) setStatus(matched + ' de ' + total + ' archivos reconocidos.', matched > 0 ? 'ok' : 'err');
-    }
+      (function(f,c){ loadFile(f, c, function(){ done++; if (done===total) setStatus(matched+' de '+total+' cargados.', 'ok'); }); })(files[i], code);
+    } else { done++; if (done===total) setStatus(matched+' de '+total+' cargados.', matched>0?'ok':'err'); }
   }
 }
 
 function guessCode(name) {
-  // Single char
-  if (name.length === 1) {
-    var c = name.charCodeAt(0);
-    if (ALL_CODES.indexOf(c) !== -1) return c;
-  }
-  // 4-digit hex like "0041"
-  if (/^[0-9a-fA-F]{4}$/.test(name)) {
-    var c2 = parseInt(name, 16);
-    if (ALL_CODES.indexOf(c2) !== -1) return c2;
-  }
-  // First char of longer name
-  if (name.length > 1) {
-    var c3 = name.charCodeAt(0);
-    if (ALL_CODES.indexOf(c3) !== -1) return c3;
-  }
+  if (name.length===1 && ALL.indexOf(name.charCodeAt(0))!==-1) return name.charCodeAt(0);
+  if (/^[0-9a-fA-F]{4}$/.test(name)) { var c=parseInt(name,16); if (ALL.indexOf(c)!==-1) return c; }
+  if (name.length>1 && ALL.indexOf(name.charCodeAt(0))!==-1) return name.charCodeAt(0);
   return -1;
 }
 
-// ── Preview ────────────────────────────────────────────────────────────
 function renderPreview() {
   var canvas = document.getElementById('pv-canvas');
-  var wrap   = document.getElementById('pv-wrap');
+  var wrap   = document.getElementById('pv-canvas-wrap');
   var text   = document.getElementById('pv-text').value || '';
-  var size   = parseInt(document.getElementById('pv-size').value)  || 48;
-  var sp     = parseInt(document.getElementById('pv-sp').value)    || 10;
-  var asc    = parseInt(document.getElementById('m-asc').value)    || 800;
-  var sf     = size / 1000;
-  var lineH  = size * 1.4;
-  var W      = wrap.clientWidth || 300;
-
-  var lines = text.split('\n');
-  canvas.width  = W;
-  canvas.height = Math.max(80, lineH * lines.length + 20);
-
+  var size   = parseInt(document.getElementById('pv-size').value) || 48;
+  var sp     = parseInt(document.getElementById('pv-sp').value) || 10;
+  var asc    = parseInt(document.getElementById('m-asc').value) || 800;
+  var sf = size/1000, lineH = size*1.4, lines = text.split('\n');
+  var W = wrap.clientWidth || 300;
+  canvas.width = W; canvas.height = Math.max(80, lineH*lines.length+20);
   var ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
   var startY = 10;
-  for (var l = 0; l < lines.length; l++) {
-    var x = 10;
-    for (var ci = 0; ci < lines[l].length; ci++) {
-      var code = lines[l].charCodeAt(ci);
-      var g = glyphs[code];
-      if (!g) { x += size * 0.4 + sp; continue; }
-      var gs = g.scale / 100;
-      var dH = size;
-      var ratio = g.img.naturalHeight > 0 ? (g.img.naturalWidth * gs) / (g.img.naturalHeight * gs) : 1;
-      var dW = dH * ratio;
-      var dY = startY + asc * sf - dH + g.baseline * sf;
-      ctx.drawImage(g.img, x, dY, dW, dH);
-      x += g.advance * sf + sp;
+  for (var l=0;l<lines.length;l++) {
+    var x=10;
+    for (var ci=0;ci<lines[l].length;ci++) {
+      var code=lines[l].charCodeAt(ci), g=glyphs[code];
+      if (!g) { x+=size*0.4+sp; continue; }
+      var gs=g.scale/100, dH=size, dW=g.img.naturalWidth*gs*(dH/(g.img.naturalHeight*gs));
+      ctx.drawImage(g.img, x, startY+asc*sf-dH+g.baseline*sf, dW, dH);
+      x+=g.advance*sf+sp;
     }
-    startY += lineH;
+    startY+=lineH;
   }
 }
 
-// ── Exportar ───────────────────────────────────────────────────────────
 function exportFont() {
-  var codes = [];
-  for (var k in glyphs) {
-    if (glyphs.hasOwnProperty(k) && parseInt(k) !== 32) codes.push(parseInt(k));
-  }
-  if (!codes.length) { setStatus('No hay glifos cargados.', 'err'); return; }
-
-  setStatus('Cargando librer\u00eda...');
-  showProg(0);
-
-  if (typeof opentype !== 'undefined') { doExport(codes); return; }
-  var s = document.createElement('script');
-  s.src = 'https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js';
-  s.onload  = function() { doExport(codes); };
-  s.onerror = function() { setStatus('Necesitas conexi\u00f3n para exportar.', 'err'); };
+  var keys=[];
+  for (var k in glyphs) { if (glyphs.hasOwnProperty(k) && parseInt(k)!==32) keys.push(parseInt(k)); }
+  if (!keys.length) { setStatus('No hay glifos cargados.','err'); return; }
+  setStatus('Cargando...'); showProg(0);
+  if (typeof opentype!=='undefined') { doExport(keys); return; }
+  var s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js';
+  s.onload=function(){doExport(keys);};
+  s.onerror=function(){setStatus('Necesitas conexion para exportar.','err');};
   document.head.appendChild(s);
 }
 
-function doExport(codes) {
-  var name = document.getElementById('exp-name').value.trim() || 'IndustarFont';
-  var asc  = parseInt(document.getElementById('m-asc').value)  || 800;
-  var desc = parseInt(document.getElementById('m-desc').value) || -200;
-
-  var nd = new opentype.Path();
-  nd.moveTo(50,0); nd.lineTo(450,0); nd.lineTo(450,700); nd.lineTo(50,700); nd.close();
-
-  var gl = [
-    new opentype.Glyph({name:'.notdef', unicode:0,  advanceWidth:500, path:nd}),
-    new opentype.Glyph({name:'space',   unicode:32, advanceWidth:250, path:new opentype.Path()})
-  ];
-
-  var off  = document.createElement('canvas');
-  var octx = off.getContext('2d');
-  var done = 0;
-
+function doExport(keys) {
+  var name=document.getElementById('exp-name').value.trim()||'IndustarFont';
+  var asc=parseInt(document.getElementById('m-asc').value)||800;
+  var desc=parseInt(document.getElementById('m-desc').value)||-200;
+  var nd=new opentype.Path(); nd.moveTo(50,0);nd.lineTo(450,0);nd.lineTo(450,700);nd.lineTo(50,700);nd.close();
+  var gl=[new opentype.Glyph({name:'.notdef',unicode:0,advanceWidth:500,path:nd}),new opentype.Glyph({name:'space',unicode:32,advanceWidth:250,path:new opentype.Path()})];
+  var off=document.createElement('canvas'), octx=off.getContext('2d'), done=0;
   function next() {
-    if (done >= codes.length) { finish(); return; }
-    var code = codes[done++];
-    showProg(Math.round(done / codes.length * 90));
-    try {
-      var path = imgToPath(glyphs[code], asc, off, octx);
-      var hex = code.toString(16).toUpperCase();
-      while (hex.length < 4) hex = '0' + hex;
-      gl.push(new opentype.Glyph({
-        name: 'uni' + hex,
-        unicode: code,
-        advanceWidth: Math.round(glyphs[code].advance),
-        path: path
-      }));
-    } catch(e) { console.warn('Glifo fallido:', code, e); }
-    setTimeout(next, 0);
+    if (done>=keys.length){finish();return;}
+    var code=keys[done++]; showProg(Math.round(done/keys.length*90));
+    try { var path=imgToPath(glyphs[code],asc,off,octx),h=code.toString(16).toUpperCase();while(h.length<4)h='0'+h; gl.push(new opentype.Glyph({name:'uni'+h,unicode:code,advanceWidth:Math.round(glyphs[code].advance),path:path})); } catch(e){console.warn(code,e);}
+    setTimeout(next,0);
   }
-
   function finish() {
-    showProg(99);
-    setStatus('Generando archivo...');
-    try {
-      var font = new opentype.Font({
-        familyName: name, styleName: 'Regular',
-        unitsPerEm: 1000, ascender: asc, descender: desc,
-        glyphs: gl
-      });
-      font.download(name + '.otf');
-      showProg(100);
-      setStatus('\u2713 ' + name + '.otf descargado \u2014 ' + (gl.length - 2) + ' glifos', 'ok');
-    } catch(e) {
-      setStatus('Error: ' + e.message, 'err');
-    }
-    setTimeout(function() { document.getElementById('prog-wrap').style.display = 'none'; }, 3000);
+    showProg(99);setStatus('Generando...');
+    try { var font=new opentype.Font({familyName:name,styleName:'Regular',unitsPerEm:1000,ascender:asc,descender:desc,glyphs:gl}); font.download(name+'.otf'); showProg(100); setStatus(name+'.otf descargado - '+(gl.length-2)+' glifos','ok'); }
+    catch(e){setStatus('Error: '+e.message,'err');}
+    setTimeout(function(){document.getElementById('prog-wrap').style.display='none';},3000);
   }
-
   next();
 }
 
-function imgToPath(g, asc, canvas, ctx) {
-  var tH = 256;
-  var gs = g.scale / 100;
-  var srcH = g.img.naturalHeight * gs;
-  var srcW = g.img.naturalWidth  * gs;
-  var ratio = srcH > 0 ? tH / srcH : 1;
-  var tW = Math.max(1, Math.round(srcW * ratio));
-
-  canvas.width = tW; canvas.height = tH;
-  ctx.clearRect(0, 0, tW, tH);
-  ctx.drawImage(g.img, 0, 0, tW, tH);
-
-  var px   = ctx.getImageData(0, 0, tW, tH).data;
-  var grid = new Uint8Array(tW * tH);
-  for (var i = 0; i < tW * tH; i++) {
-    var a = px[i*4+3], r = px[i*4];
-    grid[i] = (a > 64 || (a === 0 && r < 128)) ? 1 : 0;
-  }
-
-  var path    = new opentype.Path();
-  var sx      = g.advance / tW;
-  var sy      = asc / tH;
-  var bOff    = Math.round(g.baseline);
-  var visited = new Uint8Array(tW * tH);
-  var DX = [1,1,0,-1,-1,-1,0,1];
-  var DY = [0,1,1,1,0,-1,-1,-1];
-
-  for (var y = 0; y < tH; y++) {
-    for (var x = 0; x < tW; x++) {
-      var idx = y * tW + x;
-      if (!grid[idx] || visited[idx]) continue;
-
-      var pts = [], cx2 = x, cy2 = y, pd = 7;
-      for (var step = 0; step < tW * tH; step++) {
-        visited[cy2 * tW + cx2] = 1;
-        pts.push([cx2, cy2]);
-        var found = false;
-        for (var d = 0; d < 8; d++) {
-          var dir = (pd + 6 + d) % 8;
-          var nx = cx2 + DX[dir], ny = cy2 + DY[dir];
-          if (nx < 0 || nx >= tW || ny < 0 || ny >= tH) continue;
-          if (grid[ny * tW + nx]) { cx2 = nx; cy2 = ny; pd = dir; found = true; break; }
-        }
-        if (!found || (cx2 === x && cy2 === y && step > 2)) break;
-      }
-
-      if (pts.length < 3) continue;
-      path.moveTo(pts[0][0] * sx, asc - pts[0][1] * sy + bOff);
-      for (var pi = 1; pi < pts.length; pi++) {
-        var pp = pts[pi-1], pc = pts[pi], pn = pts[pi+1] || pts[0];
-        if ((pc[0]-pp[0]) !== (pn[0]-pc[0]) || (pc[1]-pp[1]) !== (pn[1]-pc[1])) {
-          path.lineTo(pc[0] * sx, asc - pc[1] * sy + bOff);
-        }
-      }
-      path.close();
-    }
-  }
+function imgToPath(g,asc,canvas,ctx) {
+  var tH=256,gs=g.scale/100,ratio=tH/(g.img.naturalHeight*gs),tW=Math.max(1,Math.round(g.img.naturalWidth*gs*ratio));
+  canvas.width=tW;canvas.height=tH;ctx.clearRect(0,0,tW,tH);ctx.drawImage(g.img,0,0,tW,tH);
+  var px=ctx.getImageData(0,0,tW,tH).data,grid=new Uint8Array(tW*tH);
+  for(var i=0;i<tW*tH;i++){var a=px[i*4+3],r=px[i*4];grid[i]=(a>64||(a===0&&r<128))?1:0;}
+  var path=new opentype.Path(),sx=g.advance/tW,sy=asc/tH,bOff=Math.round(g.baseline),visited=new Uint8Array(tW*tH);
+  var DX=[1,1,0,-1,-1,-1,0,1],DY=[0,1,1,1,0,-1,-1,-1];
+  for(var y=0;y<tH;y++){for(var x=0;x<tW;x++){var idx=y*tW+x;if(!grid[idx]||visited[idx])continue;
+    var pts=[],cx=x,cy=y,pd=7;
+    for(var step=0;step<tW*tH;step++){visited[cy*tW+cx]=1;pts.push([cx,cy]);var found=false;
+      for(var d=0;d<8;d++){var dir=(pd+6+d)%8,nx=cx+DX[dir],ny=cy+DY[dir];if(nx<0||nx>=tW||ny<0||ny>=tH)continue;if(grid[ny*tW+nx]){cx=nx;cy=ny;pd=dir;found=true;break;}}
+      if(!found||(cx===x&&cy===y&&step>2))break;}
+    if(pts.length<3)continue;
+    path.moveTo(pts[0][0]*sx,asc-pts[0][1]*sy+bOff);
+    for(var pi=1;pi<pts.length;pi++){var pp=pts[pi-1],pc=pts[pi],pn=pts[pi+1]||pts[0];if((pc[0]-pp[0])!==(pn[0]-pc[0])||(pc[1]-pp[1])!==(pn[1]-pc[1]))path.lineTo(pc[0]*sx,asc-pc[1]*sy+bOff);}
+    path.close();}}
   return path;
 }
 
-// ── UI ─────────────────────────────────────────────────────────────────
 function showPage(name) {
-  try {
-    var pages = document.querySelectorAll('.page');
-    for (var i = 0; i < pages.length; i++) pages[i].classList.remove('on');
-    var tabs = document.querySelectorAll('.tab');
-    for (var j = 0; j < tabs.length; j++) tabs[j].classList.remove('on');
-    var pg = document.getElementById('pg-' + name);
-    var tb = document.getElementById('tab-' + name);
-    if (pg) pg.classList.add('on');
-    if (tb) tb.classList.add('on');
-    if (name === 'preview') renderPreview();
-  } catch(e) {
-    alert('showPage error: ' + e.message);
-  }
+  var pgs=document.querySelectorAll('.pg'); for(var i=0;i<pgs.length;i++) pgs[i].classList.remove('on');
+  var tbs=document.querySelectorAll('.tab'); for(var j=0;j<tbs.length;j++) tbs[j].classList.remove('on');
+  document.getElementById('pg-'+name).classList.add('on');
+  document.getElementById('tab-'+name).classList.add('on');
+  window.scrollTo(0,0);
+  if(name==='preview') renderPreview();
 }
 
 function updateCounts() {
-  var n = 0;
-  for (var k in glyphs) { if (glyphs.hasOwnProperty(k)) n++; }
-  document.getElementById('n-loaded').textContent = n;
-  document.getElementById('exp-n').textContent    = n;
+  var n=0; for(var k in glyphs){if(glyphs.hasOwnProperty(k))n++;}
+  document.getElementById('n-loaded').textContent=n;
+  document.getElementById('exp-n').textContent=n;
 }
+function showProg(p){document.getElementById('prog-wrap').style.display='';document.getElementById('pfill').style.width=p+'%';}
+function setStatus(m,t){var el=document.getElementById('status');el.textContent=m;el.className=t||'';}
 
-function showProg(pct) {
-  document.getElementById('prog-wrap').style.display = '';
-  document.getElementById('pfill').style.width = pct + '%';
-}
+// Event listeners
+document.getElementById('tab-chars').addEventListener('click',   function(){showPage('chars');});
+document.getElementById('tab-editor').addEventListener('click',  function(){showPage('editor');});
+document.getElementById('tab-preview').addEventListener('click', function(){showPage('preview');});
+document.getElementById('tab-export').addEventListener('click',  function(){showPage('export');});
 
-function setStatus(msg, type) {
-  var el = document.getElementById('status');
-  el.textContent = msg;
-  el.className = type || '';
-}
-
-// ── Event listeners ────────────────────────────────────────────────────
-document.getElementById('tab-chars').addEventListener('click',   function() { showPage('chars'); });
-document.getElementById('tab-editor').addEventListener('click',  function() { showPage('editor'); });
-document.getElementById('tab-preview').addEventListener('click', function() { showPage('preview'); });
-document.getElementById('tab-export').addEventListener('click',  function() { showPage('export'); });
-
-document.getElementById('file-in').addEventListener('change', function() {
-  if (!this.files || !this.files[0] || activeCode < 0) return;
-  loadFile(this.files[0], activeCode, function() { refreshEditor(); renderPreview(); });
-  document.getElementById('file-in').value = '';
+document.getElementById('file-in').addEventListener('change', function(){
+  if(!this.files||!this.files[0]||activeCode<0)return;
+  loadFile(this.files[0],activeCode,function(){refreshEditor();renderPreview();});
+  document.getElementById('file-in').value='';
 });
-
-document.getElementById('btn-load').addEventListener('click', function() {
-  document.getElementById('file-in').click();
-});
-
+document.getElementById('btn-load').addEventListener('click', function(){document.getElementById('file-in').click();});
 document.getElementById('btn-del').addEventListener('click', deleteGlyph);
-
-document.getElementById('sl-base').addEventListener('input', function() {
-  document.getElementById('vl-base').textContent = this.value;
-  setProp('baseline', parseInt(this.value));
-});
-document.getElementById('sl-scale').addEventListener('input', function() {
-  document.getElementById('vl-scale').textContent = this.value + '%';
-  setProp('scale', parseInt(this.value));
-});
-document.getElementById('sl-adv').addEventListener('input', function() {
-  document.getElementById('vl-adv').textContent = this.value;
-  setProp('advance', parseInt(this.value));
-});
-
-document.getElementById('pv-size').addEventListener('input', function() {
-  document.getElementById('pv-size-v').textContent = this.value + 'px';
-  renderPreview();
-});
-document.getElementById('pv-sp').addEventListener('input', function() {
-  document.getElementById('pv-sp-v').textContent = this.value;
-  renderPreview();
-});
-document.getElementById('pv-text').addEventListener('input', renderPreview);
-
-document.getElementById('btn-batch').addEventListener('click', function() {
-  document.getElementById('batch-in').click();
-});
-document.getElementById('batch-in').addEventListener('change', function() {
-  if (this.files && this.files.length) batchLoad(this.files);
-  document.getElementById('batch-in').value = '';
-});
-
+document.getElementById('sl-base').addEventListener('input',  function(){document.getElementById('vl-base').textContent=this.value; setProp('baseline',parseInt(this.value));});
+document.getElementById('sl-scale').addEventListener('input', function(){document.getElementById('vl-scale').textContent=this.value+'%'; setProp('scale',parseInt(this.value));});
+document.getElementById('sl-adv').addEventListener('input',   function(){document.getElementById('vl-adv').textContent=this.value; setProp('advance',parseInt(this.value));});
+document.getElementById('pv-size').addEventListener('input',  function(){document.getElementById('pv-size-v').textContent=this.value+'px'; renderPreview();});
+document.getElementById('pv-sp').addEventListener('input',    function(){document.getElementById('pv-sp-v').textContent=this.value; renderPreview();});
+document.getElementById('pv-text').addEventListener('input',  renderPreview);
+document.getElementById('btn-batch').addEventListener('click', function(){document.getElementById('batch-in').click();});
+document.getElementById('batch-in').addEventListener('change', function(){if(this.files&&this.files.length)batchLoad(this.files);this.value='';});
 document.getElementById('btn-export').addEventListener('click', exportFont);
 document.getElementById('m-asc').addEventListener('input', renderPreview);
 
-// ── Init ───────────────────────────────────────────────────────────────
 buildGrids();
 </script>
 </body>
