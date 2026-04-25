@@ -315,8 +315,8 @@ function drawGlyphCanvas() {
   ctx.fillStyle = "#0d0d0d";
   ctx.fillRect(0, 0, W, H);
 
-  // Cuadricula sutil
-  ctx.strokeStyle = "rgba(255,255,255,0.04)";
+  // Cuadricula mas visible
+  ctx.strokeStyle = "rgba(255,255,255,0.12)";
   ctx.lineWidth = 1;
   var step = Math.round(W / 12);
   for (var x = 0; x <= W; x += step) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
@@ -382,27 +382,32 @@ function drawGlyphCanvas() {
     var bOffset = (g.baseline / 200) * H * 0.25;
     var dY = baseY - dH + bOffset;
 
-    // Dibujar en canvas auxiliar para invertir colores
+    // Dibujar en canvas auxiliar para convertir a blanco
     var aux = document.createElement("canvas");
     aux.width  = Math.ceil(dW);
     aux.height = Math.ceil(dH);
     var actx = aux.getContext("2d");
     actx.drawImage(g.img, 0, 0, Math.ceil(dW), Math.ceil(dH));
 
-    // Convertir pixeles oscuros/opacos a blanco puro
     var imgData = actx.getImageData(0, 0, aux.width, aux.height);
     var data = imgData.data;
     for (var i = 0; i < data.length; i += 4) {
       var a = data[i+3];
       var brightness = (data[i] + data[i+1] + data[i+2]) / 3;
-      // Si es opaco o pixel oscuro sobre fondo blanco: pintar blanco
-      if (a > 40 || brightness < 180) {
+
+      if (a > 40) {
+        // Pixel opaco: pintar blanco manteniendo el alfa original
         data[i]   = 255;
         data[i+1] = 255;
         data[i+2] = 255;
-        data[i+3] = (a > 40) ? a : Math.round((1 - brightness/255) * 255);
+        // Si es PNG con fondo blanco, usar la oscuridad como alfa
+        if (brightness < 200) {
+          data[i+3] = Math.round((1 - brightness / 255) * 255);
+        }
+        // Si es PNG transparente con letra oscura, el alfa ya viene bien
       } else {
-        data[i+3] = 0; // transparente
+        // Pixel transparente: dejarlo completamente transparente
+        data[i+3] = 0;
       }
     }
     actx.putImageData(imgData, 0, 0);
