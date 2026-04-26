@@ -378,9 +378,12 @@ function drawGlyphCanvas() {
     var dW = iW * factor;
 
     var dX = (W - dW) / 2;
-    // Anclar la base de la letra a la linea baseline + ajuste del slider
+    // La baseline en el PNG original está al 80% de su altura (480/600)
+    // Calculamos dónde cae ese punto en el canvas escalado
+    var baselineInImg = dH * 0.80;
+    // Ajustamos para que ese punto coincida con la linea baseline del lienzo
     var bOffset = (g.baseline / 200) * H * 0.15;
-    var dY = baseY - dH + bOffset;
+    var dY = baseY - baselineInImg + bOffset;
 
     // Dibujar en canvas auxiliar para convertir a blanco
     var aux = document.createElement("canvas");
