@@ -247,10 +247,10 @@ var SYM   = [46,44,59,58,33,161,63,191,45,95,40,41,47,64,35,37,38,43,61,34,39,32
 var ALL   = UPPER.concat(LOWER).concat(NUMS).concat(SYM);
 
 // Guias tipograficas como porcentaje de la altura del canvas
-var G_ASC  = 0.06;
-var G_CAP  = 0.13;
-var G_BASE = 0.78;
-var G_DESC = 0.92;
+var G_ASC  = 0.05;
+var G_CAP  = 0.10;
+var G_BASE = 0.80;
+var G_DESC = 0.93;
 
 function buildGrids() {
   fill("grid-upper", UPPER);
@@ -378,8 +378,8 @@ function drawGlyphCanvas() {
     var dW = iW * factor;
 
     var dX = (W - dW) / 2;
-    // Baseline offset: mover letra segun slider
-    var bOffset = (g.baseline / 200) * H * 0.25;
+    // Anclar la base de la letra a la linea baseline + ajuste del slider
+    var bOffset = (g.baseline / 200) * H * 0.15;
     var dY = baseY - dH + bOffset;
 
     // Dibujar en canvas auxiliar para convertir a blanco
