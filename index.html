@@ -377,12 +377,19 @@ function drawGlyphCanvas() {
     var dH = iH * factor;
     var dW = iW * factor;
 
+    // Escalar para que los 600px del PNG correspondan exactamente a la altura del lienzo
+    // sin recortar ni ampliar — proporcion 1:1 entre PNG y lienzo
+    var pngH = g.img.naturalHeight;
+    var pngW = g.img.naturalWidth;
+    // Factor de escala: que los 600px del PNG quepan en la altura H del lienzo
+    var scaleFactor = (H / pngH) * (g.scale / 100);
+    var dH = pngH * scaleFactor;
+    var dW = pngW * scaleFactor;
+
     var dX = (W - dW) / 2;
-    // La baseline en el PNG original está al 80% de su altura (480/600)
-    // Calculamos dónde cae ese punto en el canvas escalado
+    // La baseline en el PNG esta al 80% (480/600)
     var baselineInImg = dH * 0.80;
-    // Ajustamos para que ese punto coincida con la linea baseline del lienzo
-    var bOffset = (g.baseline / 200) * H * 0.15;
+    var bOffset = (g.baseline / 200) * H * 0.10;
     var dY = baseY - baselineInImg + bOffset;
 
     // Dibujar en canvas auxiliar para convertir a blanco
