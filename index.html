@@ -668,7 +668,8 @@ function doExport(keys) {
       var h=code.toString(16).toUpperCase(); while(h.length<4)h="0"+h;
       gl.push(new opentype.Glyph({name:"uni"+h,unicode:code,advanceWidth:Math.round(glyphs[code].advance),path:path}));
     }catch(e){console.warn(code,e);}
-    setTimeout(next,0);
+    setStatus("Procesando glifo "+done+" de "+keys.length+"...","");
+    setTimeout(next, 50);
   }
   function finish(){
     showProg(99); setStatus("Generando archivo...");
@@ -698,7 +699,7 @@ function doExport(keys) {
 }
 
 function imgToPath(g,asc,canvas,ctx){
-  var tH=256,gs=g.scale/100,ratio=tH/(g.img.naturalHeight*gs),tW=Math.max(1,Math.round(g.img.naturalWidth*gs*ratio));
+  var tH=128,gs=g.scale/100,ratio=tH/(g.img.naturalHeight*gs),tW=Math.max(1,Math.round(g.img.naturalWidth*gs*ratio));
   canvas.width=tW;canvas.height=tH;ctx.clearRect(0,0,tW,tH);ctx.drawImage(g.img,0,0,tW,tH);
   var px=ctx.getImageData(0,0,tW,tH).data,grid=new Uint8Array(tW*tH);
   for(var i=0;i<tW*tH;i++){var a=px[i*4+3],r=px[i*4];grid[i]=(a>64||(a===0&&r<128))?1:0;}
