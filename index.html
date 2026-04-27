@@ -713,13 +713,13 @@ function imgToPath(g,asc,canvas,ctx){
       var ink=(x<tW)?grid[y*tW+x]:0;
       if(ink&&startX<0){ startX=x; }
       else if(!ink&&startX>=0){
-        // Rectangulo horizontal de startX a x en fila y
+        // Rectangulo en sentido antihorario (correcto para OTF)
         var x1=startX*sx, x2=x*sx;
-        var y1=asc-(y+1)*sy+bOff, y2=asc-y*sy+bOff;
+        var y1=asc-(y)*sy+bOff, y2=asc-(y+1)*sy+bOff;
         path.moveTo(x1,y1);
-        path.lineTo(x2,y1);
-        path.lineTo(x2,y2);
         path.lineTo(x1,y2);
+        path.lineTo(x2,y2);
+        path.lineTo(x2,y1);
         path.close();
         startX=-1;
       }
