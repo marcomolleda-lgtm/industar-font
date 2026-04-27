@@ -674,7 +674,22 @@ function doExport(keys) {
     showProg(99); setStatus("Generando archivo...");
     try{
       var font=new opentype.Font({familyName:name,styleName:"Regular",unitsPerEm:1000,ascender:asc,descender:desc,glyphs:gl});
-      font.download(name+".otf"); showProg(100);
+      // Usar ArrayBuffer y Blob para compatibilidad con Chrome Android
+      var arrayBuffer = font.download ? null : null;
+      var buf = font.toArrayBuffer ? font.toArrayBuffer() : font.download();
+      if (buf) {
+        var blob = new Blob([buf], {type: "font/otf"});
+        var url  = URL.createObjectURL(blob);
+        var a    = document.createElement("a");
+        a.href     = url;
+        a.download = name + ".otf";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function(){ URL.revokeObjectURL(url); document.body.removeChild(a); }, 1000);
+      } else {
+        font.download(name + ".otf");
+      }
+      showProg(100);
       setStatus(name+".otf listo - "+(gl.length-2)+" glifos","ok");
     }catch(e){setStatus("Error: "+e.message,"err");}
     setTimeout(function(){document.getElementById("prog-wrap").style.display="none";},3000);
