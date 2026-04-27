@@ -699,29 +699,67 @@ function doExport(keys) {
 }
 
 function imgToPath(g,asc,canvas,ctx){
-  var tH=96,gs=g.scale/100,ratio=tH/(g.img.naturalHeight*gs),tW=Math.max(1,Math.round(g.img.naturalWidth*gs*ratio));
-  canvas.width=tW;canvas.height=tH;ctx.clearRect(0,0,tW,tH);ctx.drawImage(g.img,0,0,tW,tH);
-  var px=ctx.getImageData(0,0,tW,tH).data,grid=new Uint8Array(tW*tH);
-  for(var i=0;i<tW*tH;i++){var a=px[i*4+3],r=px[i*4];grid[i]=(a>64||(a===0&&r<128))?1:0;}
+  var tH=64, gs=g.scale/100;
+  var ratio=tH/(g.img.naturalHeight*gs);
+  var tW=Math.max(1,Math.round(g.img.naturalWidth*gs*ratio));
+  canvas.width=tW; canvas.height=tH;
+  ctx.clearRect(0,0,tW,tH);
+  ctx.drawImage(g.img,0,0,tW,tH);
+  var px=ctx.getImageData(0,0,tW,tH).data;
+  var grid=new Uint8Array(tW*tH);
+  for(var i=0;i<tW*tH;i++){
+    var a=px[i*4+3], r=px[i*4];
+    grid[i]=(a>64||(a===0&&r<128))?1:0;
+  }
   var path=new opentype.Path();
   var sx=g.advance/tW, sy=asc/tH, bOff=Math.round(g.baseline);
 
-  // Dibujar rectangulos por cada pixel de tinta - simple y sin recursion
+  // Marching squares simplificado: recorrer bordes de regiones
+  // Para cada celda, si es tinta y la de arriba no lo es => borde superior
+  // Construimos un unico rectangulo por fila continua de pixeles
+  // Usamos even-odd rule con sentido correcto
+
+  function addRect(x0,y0,x1,y1){
+    // Coordenadas en espacio de fuente (Y invertido)
+    var fx0=x0*sx, fx1=x1*sx;
+    var fy0=asc-y0*sy+bOff, fy1=asc-y1*sy+bOff;
+    // Sentido horario para contorno exterior en OTF
+    path.moveTo(fx0,fy0);
+    path.lineTo(fx1,fy0);
+    path.lineTo(fx1,fy1);
+    path.lineTo(fx0,fy1);
+    path.close();
+  }
+
+  // Agrupar pixeles en bandas horizontales por fila
+  // y combinar filas adyacentes identicas en rectangulos
+  var processed=new Uint8Array(tW*tH);
   for(var y=0;y<tH;y++){
-    var startX=-1;
-    for(var x=0;x<=tW;x++){
-      var ink=(x<tW)?grid[y*tW+x]:0;
-      if(ink&&startX<0){ startX=x; }
-      else if(!ink&&startX>=0){
-        // Rectangulo en sentido antihorario (correcto para OTF)
-        var x1=startX*sx, x2=x*sx;
-        var y1=asc-(y)*sy+bOff, y2=asc-(y+1)*sy+bOff;
-        path.moveTo(x1,y1);
-        path.lineTo(x1,y2);
-        path.lineTo(x2,y2);
-        path.lineTo(x2,y1);
-        path.close();
-        startX=-1;
+    var x=0;
+    while(x<tW){
+      if(!grid[y*tW+x]){x++;continue;}
+      // Encontrar fin de segmento horizontal
+      var x0=x;
+      while(x<tW&&grid[y*tW+x]){x++;}
+      var x1=x;
+      // Expandir hacia abajo mientras las filas sean identicas
+      var y0=y, y1=y+1;
+      while(y1<tH){
+        var same=true;
+        for(var cx=x0;cx<x1;cx++){
+          if(grid[y1*tW+cx]!==1){same=false;break;}
+        }
+        // Verificar que no haya pixeles extra fuera del segmento
+        if(same&&x0>0&&grid[y1*tW+(x0-1)]){same=false;}
+        if(same&&x1<tW&&grid[y1*tW+x1]){same=false;}
+        if(!same)break;
+        // Marcar como procesados
+        for(var cx2=x0;cx2<x1;cx2++) processed[y1*tW+cx2]=1;
+        y1++;
+      }
+      // Solo añadir si no fue ya procesado por expansion anterior
+      if(!processed[y*tW+x0]){
+        addRect(x0,y0,x1,y1);
       }
     }
   }
