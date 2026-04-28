@@ -796,62 +796,69 @@ function svgPathsToOTF(svgPaths, viewBox, advance, asc, baseline) {
   var vbH = viewBox ? viewBox.h : 600;
   var vbX = viewBox ? viewBox.x : 0;
   var vbY = viewBox ? viewBox.y : 0;
-  var bOff = baseline || 0;
+  var bOff = (baseline || 0) * (asc / 800);
 
-  // Escala: mapear viewBox a unidades OTF
-  // X: 0..vbW -> 0..advance
-  // Y: 0..vbH -> asc..(asc-vbH*sy) con Y invertido
-  var sx = advance / vbW;
-  var sy = asc / vbH;
+  // La baseline en el SVG esta a vbH*0.80 (480 de 600)
+  // En OTF la baseline es Y=0, arriba es positivo
+  // Mapeo: svgY=480 -> otfY=0, svgY=60 -> otfY=asc
+  var svgBaseline = vbH * 0.80; // 480
+  var svgCapH     = vbH * 0.10; // 60
+  var otfRange    = asc; // 800
 
-  function tx(x) { return (x - vbX) * sx; }
-  function ty(y) { return asc - (y - vbY) * sy + bOff; }
+  function tx(x) {
+    return ((x - vbX) / vbW) * advance;
+  }
+  function ty(y) {
+    // Invertir Y y ajustar para que svgBaseline=0 en OTF
+    return (svgBaseline - (y - vbY)) * (otfRange / (svgBaseline - svgCapH)) + bOff;
+  }
 
   for (var pi = 0; pi < svgPaths.length; pi++) {
     var d = svgPaths[pi];
-    // Tokenizar el path SVG
     var tokens = d.match(/[MmLlHhVvCcSsQqTtAaZz]|[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?/g);
     if (!tokens) continue;
+
     var i = 0, cx = 0, cy = 0, startX = 0, startY = 0;
     var lastCmd = '', lastCx = 0, lastCy = 0;
 
     while (i < tokens.length) {
-      var cmd = tokens[i];
-      if (!/[MmLlHhVvCcSsQqTtAaZz]/.test(cmd)) { i++; continue; }
+      var tok = tokens[i];
+      if (!/[MmLlHhVvCcSsQqTtAaZz]/.test(tok)) { i++; continue; }
+      var cmd = tok;
       i++;
 
       if (cmd === 'M' || cmd === 'm') {
         while (i < tokens.length && !/[MmLlHhVvCcSsQqTtAaZz]/.test(tokens[i])) {
-          var dx = parseFloat(tokens[i++]), dy = parseFloat(tokens[i++]);
-          if (cmd === 'm') { cx += dx; cy += dy; } else { cx = dx; cy = dy; }
-          path.moveTo(tx(cx), ty(cy));
-          startX = cx; startY = cy;
-          cmd = cmd === 'M' ? 'L' : 'l';
+          var nx=parseFloat(tokens[i++]), ny=parseFloat(tokens[i++]);
+          if (cmd==='m'){cx+=nx;cy+=ny;}else{cx=nx;cy=ny;}
+          path.moveTo(tx(cx),ty(cy));
+          startX=cx; startY=cy;
+          cmd=(cmd==='M')?'L':'l';
         }
       } else if (cmd === 'L' || cmd === 'l') {
         while (i < tokens.length && !/[MmLlHhVvCcSsQqTtAaZz]/.test(tokens[i])) {
-          var dx = parseFloat(tokens[i++]), dy = parseFloat(tokens[i++]);
-          if (cmd === 'l') { cx += dx; cy += dy; } else { cx = dx; cy = dy; }
-          path.lineTo(tx(cx), ty(cy));
+          var nx=parseFloat(tokens[i++]), ny=parseFloat(tokens[i++]);
+          if (cmd==='l'){cx+=nx;cy+=ny;}else{cx=nx;cy=ny;}
+          path.lineTo(tx(cx),ty(cy));
         }
       } else if (cmd === 'H' || cmd === 'h') {
         while (i < tokens.length && !/[MmLlHhVvCcSsQqTtAaZz]/.test(tokens[i])) {
-          var dx = parseFloat(tokens[i++]);
-          if (cmd === 'h') cx += dx; else cx = dx;
-          path.lineTo(tx(cx), ty(cy));
+          var nx=parseFloat(tokens[i++]);
+          if (cmd==='h')cx+=nx;else cx=nx;
+          path.lineTo(tx(cx),ty(cy));
         }
       } else if (cmd === 'V' || cmd === 'v') {
         while (i < tokens.length && !/[MmLlHhVvCcSsQqTtAaZz]/.test(tokens[i])) {
-          var dy = parseFloat(tokens[i++]);
-          if (cmd === 'v') cy += dy; else cy = dy;
-          path.lineTo(tx(cx), ty(cy));
+          var ny=parseFloat(tokens[i++]);
+          if (cmd==='v')cy+=ny;else cy=ny;
+          path.lineTo(tx(cx),ty(cy));
         }
       } else if (cmd === 'C' || cmd === 'c') {
         while (i < tokens.length && !/[MmLlHhVvCcSsQqTtAaZz]/.test(tokens[i])) {
           var x1=parseFloat(tokens[i++]),y1=parseFloat(tokens[i++]);
           var x2=parseFloat(tokens[i++]),y2=parseFloat(tokens[i++]);
           var xe=parseFloat(tokens[i++]),ye=parseFloat(tokens[i++]);
-          if (cmd === 'c') { x1+=cx;y1+=cy;x2+=cx;y2+=cy;xe+=cx;ye+=cy; }
+          if (cmd==='c'){x1+=cx;y1+=cy;x2+=cx;y2+=cy;xe+=cx;ye+=cy;}
           lastCx=x2; lastCy=y2;
           path.curveTo(tx(x1),ty(y1),tx(x2),ty(y2),tx(xe),ty(ye));
           cx=xe; cy=ye;
@@ -860,18 +867,42 @@ function svgPathsToOTF(svgPaths, viewBox, advance, asc, baseline) {
         while (i < tokens.length && !/[MmLlHhVvCcSsQqTtAaZz]/.test(tokens[i])) {
           var x2=parseFloat(tokens[i++]),y2=parseFloat(tokens[i++]);
           var xe=parseFloat(tokens[i++]),ye=parseFloat(tokens[i++]);
-          if (cmd === 's') { x2+=cx;y2+=cy;xe+=cx;ye+=cy; }
+          if (cmd==='s'){x2+=cx;y2+=cy;xe+=cx;ye+=cy;}
           var x1=(lastCmd==='C'||lastCmd==='c'||lastCmd==='S'||lastCmd==='s')?(2*cx-lastCx):cx;
           var y1=(lastCmd==='C'||lastCmd==='c'||lastCmd==='S'||lastCmd==='s')?(2*cy-lastCy):cy;
           lastCx=x2; lastCy=y2;
           path.curveTo(tx(x1),ty(y1),tx(x2),ty(y2),tx(xe),ty(ye));
           cx=xe; cy=ye;
         }
+      } else if (cmd === 'Q' || cmd === 'q') {
+        while (i < tokens.length && !/[MmLlHhVvCcSsQqTtAaZz]/.test(tokens[i])) {
+          var x1=parseFloat(tokens[i++]),y1=parseFloat(tokens[i++]);
+          var xe=parseFloat(tokens[i++]),ye=parseFloat(tokens[i++]);
+          if (cmd==='q'){x1+=cx;y1+=cy;xe+=cx;ye+=cy;}
+          // Convertir quadratic a cubic bezier
+          var cx1=cx+(2/3)*(x1-cx), cy1=cy+(2/3)*(y1-cy);
+          var cx2=xe+(2/3)*(x1-xe), cy2=ye+(2/3)*(y1-ye);
+          lastCx=x1; lastCy=y1;
+          path.curveTo(tx(cx1),ty(cy1),tx(cx2),ty(cy2),tx(xe),ty(ye));
+          cx=xe; cy=ye;
+        }
+      } else if (cmd === 'T' || cmd === 't') {
+        while (i < tokens.length && !/[MmLlHhVvCcSsQqTtAaZz]/.test(tokens[i])) {
+          var xe=parseFloat(tokens[i++]),ye=parseFloat(tokens[i++]);
+          if (cmd==='t'){xe+=cx;ye+=cy;}
+          var x1=(lastCmd==='Q'||lastCmd==='q'||lastCmd==='T'||lastCmd==='t')?(2*cx-lastCx):cx;
+          var y1=(lastCmd==='Q'||lastCmd==='q'||lastCmd==='T'||lastCmd==='t')?(2*cy-lastCy):cy;
+          var cx1=cx+(2/3)*(x1-cx), cy1=cy+(2/3)*(y1-cy);
+          var cx2=xe+(2/3)*(x1-xe), cy2=ye+(2/3)*(y1-ye);
+          lastCx=x1; lastCy=y1;
+          path.curveTo(tx(cx1),ty(cy1),tx(cx2),ty(cy2),tx(xe),ty(ye));
+          cx=xe; cy=ye;
+        }
       } else if (cmd === 'Z' || cmd === 'z') {
         path.close();
         cx=startX; cy=startY;
       }
-      lastCmd = cmd;
+      lastCmd=cmd;
     }
   }
   return path;
