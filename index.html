@@ -151,7 +151,7 @@ body { background: #111; color: #f0ece4; font-family: Arial, sans-serif; font-si
         <canvas id="glyph-canvas"></canvas>
       </div>
 
-      <input type="file" id="file-in" accept="image/*" style="display:none">
+      <input type="file" id="file-in" accept="image/*,.svg">
 
       <!-- Controles glifo -->
       <div class="ctrl-section" id="sliders-wrap">
@@ -214,7 +214,7 @@ body { background: #111; color: #f0ece4; font-family: Arial, sans-serif; font-si
         0041.png &rarr; c&oacute;digo Unicode
       </div>
       <button class="btn btn-p" id="btn-batch">&#128230;&ensp;Varios archivos a la vez</button>
-      <input type="file" id="batch-in" accept="image/*" multiple style="display:none">
+      <input type="file" id="batch-in" accept="image/*,.svg" multiple style="display:none">
     </div>
     <div class="card">
       <div class="card-title">M&eacute;tricas globales</div>
@@ -507,25 +507,90 @@ function syncPvFromNum(id) {
 
 // ── GLIFOS ────────────────────────────────────────────────────────────
 function loadFile(file, code, cb) {
+  var isSVG = file.name.toLowerCase().indexOf(".svg") !== -1;
   var reader = new FileReader();
   reader.onload = function(e) {
-    var img = new Image();
-    img.onload = function() {
+    if (isSVG) {
+      // Extraer paths del SVG directamente
+      var svgText = e.target.result;
+      var paths = extractSVGPaths(svgText);
+      var viewBox = extractViewBox(svgText);
       var prev = glyphs[code];
-      glyphs[code] = {
-        img: img, src: e.target.result,
-        baseline: prev ? prev.baseline : 0,
-        scale:    prev ? prev.scale    : 100,
-        advance:  prev ? prev.advance  : Math.min(500, Math.round(img.naturalWidth * 1.1))
+      // Para preview, crear imagen del SVG
+      var blob = new Blob([svgText], {type:"image/svg+xml"});
+      var url  = URL.createObjectURL(blob);
+      var img  = new Image();
+      img.onload = function() {
+        glyphs[code] = {
+          img:      img,
+          src:      url,
+          svgPaths: paths,
+          viewBox:  viewBox,
+          isSVG:    true,
+          baseline: prev ? prev.baseline : 0,
+          scale:    prev ? prev.scale    : 100,
+          advance:  prev ? prev.advance  : Math.round(viewBox ? viewBox.w * (800/viewBox.h) : 500)
+        };
+        markLoaded(code);
+        saveToStorage(code, svgText);
+        updateCounts();
+        if (cb) cb();
       };
-      markLoaded(code);
-      saveToStorage(code);
-      updateCounts();
-      if (cb) cb();
-    };
-    img.src = e.target.result;
+      img.onerror = function() {
+        // Si falla como imagen, guardar igual con paths
+        glyphs[code] = {
+          img: null, src: null,
+          svgPaths: paths, viewBox: viewBox, isSVG: true,
+          baseline: prev ? prev.baseline : 0,
+          scale:    prev ? prev.scale    : 100,
+          advance:  prev ? prev.advance  : 500
+        };
+        markLoaded(code);
+        saveToStorage(code, svgText);
+        updateCounts();
+        if (cb) cb();
+      };
+      img.src = url;
+    } else {
+      var img = new Image();
+      img.onload = function() {
+        var prev = glyphs[code];
+        glyphs[code] = {
+          img: img, src: e.target.result, isSVG: false,
+          baseline: prev ? prev.baseline : 0,
+          scale:    prev ? prev.scale    : 100,
+          advance:  prev ? prev.advance  : Math.min(500, Math.round(img.naturalWidth * 1.1))
+        };
+        markLoaded(code);
+        saveToStorage(code, null);
+        updateCounts();
+        if (cb) cb();
+      };
+      img.src = e.target.result;
+    }
   };
-  reader.readAsDataURL(file);
+  if (file.name.toLowerCase().indexOf(".svg") !== -1) {
+    reader.readAsText(file);
+  } else {
+    reader.readAsDataURL(file);
+  }
+}
+
+function extractSVGPaths(svgText) {
+  var paths = [];
+  var re = /d="([^"]+)"/g;
+  var m;
+  while ((m = re.exec(svgText)) !== null) {
+    paths.push(m[1]);
+  }
+  return paths;
+}
+
+function extractViewBox(svgText) {
+  var m = svgText.match(/viewBox="([^"]+)"/);
+  if (!m) return null;
+  var parts = m[1].split(/[\s,]+/);
+  return { x: parseFloat(parts[0]), y: parseFloat(parts[1]), w: parseFloat(parts[2]), h: parseFloat(parts[3]) };
 }
 
 function markLoaded(code) {
@@ -555,10 +620,16 @@ function setProp(prop, val) {
 }
 
 // ── LOCALSTORAGE ───────────────────────────────────────────────────────
-function saveToStorage(code) {
+function saveToStorage(code, svgText) {
   try {
     var g = glyphs[code];
-    localStorage.setItem("if_glyph_" + code, JSON.stringify({src:g.src,baseline:g.baseline,scale:g.scale,advance:g.advance}));
+    var data;
+    if (g.isSVG) {
+      data = JSON.stringify({isSVG:true, svgText:svgText, svgPaths:g.svgPaths, viewBox:g.viewBox, baseline:g.baseline, scale:g.scale, advance:g.advance});
+    } else {
+      data = JSON.stringify({isSVG:false, src:g.src, baseline:g.baseline, scale:g.scale, advance:g.advance});
+    }
+    localStorage.setItem("if_glyph_"+code, data);
   } catch(e) { console.warn("Storage lleno"); }
 }
 
@@ -569,13 +640,24 @@ function loadFromStorage() {
       var raw = localStorage.getItem("if_glyph_" + code);
       if (!raw) continue;
       var d = JSON.parse(raw);
-      (function(c,d2) {
-        var img = new Image();
-        img.onload = function() {
-          glyphs[c] = {img:img, src:d2.src, baseline:d2.baseline, scale:d2.scale, advance:d2.advance};
-          markLoaded(c); updateCounts();
-        };
-        img.src = d2.src;
+      (function(c, d2) {
+        if (d2.isSVG) {
+          var blob = new Blob([d2.svgText||""], {type:"image/svg+xml"});
+          var url  = URL.createObjectURL(blob);
+          var img  = new Image();
+          img.onload = function() {
+            glyphs[c] = {img:img, src:url, isSVG:true, svgPaths:d2.svgPaths, viewBox:d2.viewBox, baseline:d2.baseline, scale:d2.scale, advance:d2.advance};
+            markLoaded(c); updateCounts();
+          };
+          img.src = url;
+        } else {
+          var img2 = new Image();
+          img2.onload = function() {
+            glyphs[c] = {img:img2, src:d2.src, isSVG:false, baseline:d2.baseline, scale:d2.scale, advance:d2.advance};
+            markLoaded(c); updateCounts();
+          };
+          img2.src = d2.src;
+        }
       })(code, d);
     }
   } catch(e) {}
@@ -596,9 +678,15 @@ function batchLoad(files) {
 }
 
 function guessCode(name) {
+  // Nombre exacto de una letra: "A"
   if (name.length===1&&ALL.indexOf(name.charCodeAt(0))!==-1) return name.charCodeAt(0);
+  // Codigo Unicode hex: "0041"
   if (/^[0-9a-fA-F]{4}$/.test(name)){var c=parseInt(name,16);if(ALL.indexOf(c)!==-1)return c;}
-  if (name.length>1&&ALL.indexOf(name.charCodeAt(0))!==-1) return name.charCodeAt(0);
+  // Patron "A-01", "A-1", "A_mayuscula", etc: primera letra
+  if (name.length>1) {
+    var first = name.charCodeAt(0);
+    if (ALL.indexOf(first)!==-1) return first;
+  }
   return -1;
 }
 
@@ -663,10 +751,17 @@ function doExport(keys) {
   function next(){
     if(done>=keys.length){finish();return;}
     var code=keys[done++]; showProg(Math.round(done/keys.length*90));
+    var g=glyphs[code];
     try{
-      var path=imgToPath(glyphs[code],asc,off,octx);
+      var path;
+      if (g.isSVG && g.svgPaths && g.svgPaths.length > 0) {
+        // Usar paths vectoriales del SVG directamente
+        path = svgPathsToOTF(g.svgPaths, g.viewBox, g.advance, asc, g.baseline);
+      } else {
+        path = imgToPath(g, asc, off, octx);
+      }
       var h=code.toString(16).toUpperCase(); while(h.length<4)h="0"+h;
-      gl.push(new opentype.Glyph({name:"uni"+h,unicode:code,advanceWidth:Math.round(glyphs[code].advance),path:path}));
+      gl.push(new opentype.Glyph({name:"uni"+h,unicode:code,advanceWidth:Math.round(g.advance),path:path}));
     }catch(e){console.warn(code,e);}
     setStatus("Procesando glifo "+done+" de "+keys.length+"...","");
     setTimeout(next, 50);
@@ -675,20 +770,16 @@ function doExport(keys) {
     showProg(99); setStatus("Generando archivo...");
     try{
       var font=new opentype.Font({familyName:name,styleName:"Regular",unitsPerEm:1000,ascender:asc,descender:desc,glyphs:gl});
-      // Usar ArrayBuffer y Blob para compatibilidad con Chrome Android
-      var arrayBuffer = font.download ? null : null;
-      var buf = font.toArrayBuffer ? font.toArrayBuffer() : font.download();
+      var buf = font.toArrayBuffer ? font.toArrayBuffer() : null;
       if (buf) {
         var blob = new Blob([buf], {type: "font/otf"});
         var url  = URL.createObjectURL(blob);
         var a    = document.createElement("a");
-        a.href     = url;
-        a.download = name + ".otf";
-        document.body.appendChild(a);
-        a.click();
+        a.href=url; a.download=name+".otf";
+        document.body.appendChild(a); a.click();
         setTimeout(function(){ URL.revokeObjectURL(url); document.body.removeChild(a); }, 1000);
       } else {
-        font.download(name + ".otf");
+        font.download(name+".otf");
       }
       showProg(100);
       setStatus(name+".otf listo - "+(gl.length-2)+" glifos","ok");
@@ -696,6 +787,94 @@ function doExport(keys) {
     setTimeout(function(){document.getElementById("prog-wrap").style.display="none";},3000);
   }
   next();
+}
+
+// Convertir paths SVG de Illustrator a coordenadas OTF
+function svgPathsToOTF(svgPaths, viewBox, advance, asc, baseline) {
+  var path = new opentype.Path();
+  var vbW = viewBox ? viewBox.w : 500;
+  var vbH = viewBox ? viewBox.h : 600;
+  var vbX = viewBox ? viewBox.x : 0;
+  var vbY = viewBox ? viewBox.y : 0;
+  var bOff = baseline || 0;
+
+  // Escala: mapear viewBox a unidades OTF
+  // X: 0..vbW -> 0..advance
+  // Y: 0..vbH -> asc..(asc-vbH*sy) con Y invertido
+  var sx = advance / vbW;
+  var sy = asc / vbH;
+
+  function tx(x) { return (x - vbX) * sx; }
+  function ty(y) { return asc - (y - vbY) * sy + bOff; }
+
+  for (var pi = 0; pi < svgPaths.length; pi++) {
+    var d = svgPaths[pi];
+    // Tokenizar el path SVG
+    var tokens = d.match(/[MmLlHhVvCcSsQqTtAaZz]|[-+]?[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?/g);
+    if (!tokens) continue;
+    var i = 0, cx = 0, cy = 0, startX = 0, startY = 0;
+    var lastCmd = '', lastCx = 0, lastCy = 0;
+
+    while (i < tokens.length) {
+      var cmd = tokens[i];
+      if (!/[MmLlHhVvCcSsQqTtAaZz]/.test(cmd)) { i++; continue; }
+      i++;
+
+      if (cmd === 'M' || cmd === 'm') {
+        while (i < tokens.length && !/[MmLlHhVvCcSsQqTtAaZz]/.test(tokens[i])) {
+          var dx = parseFloat(tokens[i++]), dy = parseFloat(tokens[i++]);
+          if (cmd === 'm') { cx += dx; cy += dy; } else { cx = dx; cy = dy; }
+          path.moveTo(tx(cx), ty(cy));
+          startX = cx; startY = cy;
+          cmd = cmd === 'M' ? 'L' : 'l';
+        }
+      } else if (cmd === 'L' || cmd === 'l') {
+        while (i < tokens.length && !/[MmLlHhVvCcSsQqTtAaZz]/.test(tokens[i])) {
+          var dx = parseFloat(tokens[i++]), dy = parseFloat(tokens[i++]);
+          if (cmd === 'l') { cx += dx; cy += dy; } else { cx = dx; cy = dy; }
+          path.lineTo(tx(cx), ty(cy));
+        }
+      } else if (cmd === 'H' || cmd === 'h') {
+        while (i < tokens.length && !/[MmLlHhVvCcSsQqTtAaZz]/.test(tokens[i])) {
+          var dx = parseFloat(tokens[i++]);
+          if (cmd === 'h') cx += dx; else cx = dx;
+          path.lineTo(tx(cx), ty(cy));
+        }
+      } else if (cmd === 'V' || cmd === 'v') {
+        while (i < tokens.length && !/[MmLlHhVvCcSsQqTtAaZz]/.test(tokens[i])) {
+          var dy = parseFloat(tokens[i++]);
+          if (cmd === 'v') cy += dy; else cy = dy;
+          path.lineTo(tx(cx), ty(cy));
+        }
+      } else if (cmd === 'C' || cmd === 'c') {
+        while (i < tokens.length && !/[MmLlHhVvCcSsQqTtAaZz]/.test(tokens[i])) {
+          var x1=parseFloat(tokens[i++]),y1=parseFloat(tokens[i++]);
+          var x2=parseFloat(tokens[i++]),y2=parseFloat(tokens[i++]);
+          var xe=parseFloat(tokens[i++]),ye=parseFloat(tokens[i++]);
+          if (cmd === 'c') { x1+=cx;y1+=cy;x2+=cx;y2+=cy;xe+=cx;ye+=cy; }
+          lastCx=x2; lastCy=y2;
+          path.curveTo(tx(x1),ty(y1),tx(x2),ty(y2),tx(xe),ty(ye));
+          cx=xe; cy=ye;
+        }
+      } else if (cmd === 'S' || cmd === 's') {
+        while (i < tokens.length && !/[MmLlHhVvCcSsQqTtAaZz]/.test(tokens[i])) {
+          var x2=parseFloat(tokens[i++]),y2=parseFloat(tokens[i++]);
+          var xe=parseFloat(tokens[i++]),ye=parseFloat(tokens[i++]);
+          if (cmd === 's') { x2+=cx;y2+=cy;xe+=cx;ye+=cy; }
+          var x1=(lastCmd==='C'||lastCmd==='c'||lastCmd==='S'||lastCmd==='s')?(2*cx-lastCx):cx;
+          var y1=(lastCmd==='C'||lastCmd==='c'||lastCmd==='S'||lastCmd==='s')?(2*cy-lastCy):cy;
+          lastCx=x2; lastCy=y2;
+          path.curveTo(tx(x1),ty(y1),tx(x2),ty(y2),tx(xe),ty(ye));
+          cx=xe; cy=ye;
+        }
+      } else if (cmd === 'Z' || cmd === 'z') {
+        path.close();
+        cx=startX; cy=startY;
+      }
+      lastCmd = cmd;
+    }
+  }
+  return path;
 }
 
 function imgToPath(g,asc,canvas,ctx){
